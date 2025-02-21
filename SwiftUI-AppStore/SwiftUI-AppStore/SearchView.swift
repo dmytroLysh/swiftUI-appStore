@@ -6,66 +6,7 @@
 //
 
 import SwiftUI
-
-// trackName,trackId,artistName,primaryGenreName,screenshotUrls,artworkUrl512
-
-struct SearchResults: Codable {
-    let results: [AppResults]
-}
-
-struct AppResults: Codable, Identifiable {
-    
-    
-    var id:Int  { trackId }
-    
-    let trackName: String
-    let trackId: Int
-    let artworkUrl512: String
-    let primaryGenreName: String
-    let screenshotUrls: [String]
-    let artistName: String
-}
-
 import Combine
-
-@MainActor
-class SearchViewModel: ObservableObject {
-    
-    @Published var results: [AppResults] = [AppResults]()
-    @Published var query = ""
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        $query
-            .debounce(for: 0.5, scheduler: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                
-                guard let self = self else { return }
-                
-                self.fetchJsonData(searchValue: newValue)
-            }.store(in: &cancellables)
-        
-    }
-    
-    private func fetchJsonData(searchValue: String) {
-        Task {
-            do {
-                guard let url = URL(string: "https://itunes.apple.com/search?term=\(searchValue)&entity=software") else { return }
-                let (data,_) = try await URLSession.shared.data(from: url)
-                
-                let searchResult = try JSONDecoder().decode(SearchResults.self, from: data)
-                
-                self.results = searchResult.results
-                
-                
-            } catch {
-                print("Failed to due error", error)
-            }
-        }
-    }
-    
-}
 
 struct SearchView: View {
     
@@ -129,12 +70,34 @@ struct AppIconTiitleView: View {
                     .lineLimit(1)
                 Text(result.primaryGenreName)
                     .foregroundStyle(.gray)
-                Text("STARS 34.0M")
+                
+                HStack(spacing: 0) {
+                    ForEach (0..<Int(result.averageUserRating) , id: \.self) { num in
+                        
+                        Image(systemName: "star.fill")
+                        
+                    }
+                    
+                    ForEach (0..<5 - Int(result.averageUserRating) , id: \.self) { num in
+                        
+                        Image(systemName: "star")
+                        
+                    }
+                    Text(String(result.userRatingCount.roundedWithAbbreviations))
+                        .padding(.leading, 4)
+                }
+                
+                
             }
             
             Spacer()
             
-            Image(systemName: "icloud.and.arrow.down")
+            Button {
+            } label: {
+                Image(systemName: "icloud.and.arrow.down")
+                    .font(.system(size: 25))
+            }
+
         }
     }
 }
