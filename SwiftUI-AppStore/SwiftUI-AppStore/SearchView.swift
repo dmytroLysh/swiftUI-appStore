@@ -30,12 +30,17 @@ struct SearchView: View {
                     } else {
                         ScrollView {
                             ForEach(vm.results) { result in
-                                VStack(spacing: 16) {
-                                    
-                                    AppIconTiitleView(result: result)
-                                    ScreenshotsRow(proxy: proxy,results: result)
-                                }
-                                .padding(16)
+                                NavigationLink(destination:
+                                                AppDetailView(trackId: result.trackId),
+                                               label: {
+                                    VStack(spacing: 16) {
+                                        
+                                        AppIconTiitleView(result: result)
+                                        ScreenshotsRow(proxy: proxy,results: result)
+                                    }
+                                    .foregroundColor(.primary)
+                                    .padding(16)
+                                })
                             }
                         }
                     }
@@ -97,7 +102,7 @@ struct AppIconTiitleView: View {
                 Image(systemName: "icloud.and.arrow.down")
                     .font(.system(size: 25))
             }
-
+            
         }
     }
 }
