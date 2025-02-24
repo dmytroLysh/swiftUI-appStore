@@ -158,51 +158,7 @@ struct AppDetailView: View {
                 .padding(.horizontal)
             }
         }
-    }
-}
-
-struct FullScreenshotsView: View {
-    @Environment(\.dismiss) var dismiss
-    let screenshotsUrl: [String]
-    
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack {
-                VStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(.foreground)
-                            .font(.system(size: 25, weight: .semibold))
-                    }
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.horizontal)
-                
-                
-                ScrollView(.horizontal) {
-                    HStack(spacing: 16) {
-                        ForEach(screenshotsUrl, id:\.self) { screenshotUrl in
-                            let width = proxy.size.width - 64
-                            
-                            AsyncImage(url: URL(string: screenshotUrl)) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: width,height: 550)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                            } placeholder: {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .frame(width: width, height: 550)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 32)
-                }
-            }
-        }
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
