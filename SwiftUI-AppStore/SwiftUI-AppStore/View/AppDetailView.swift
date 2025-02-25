@@ -23,12 +23,12 @@ struct AppDetail: Codable {
     let trackName: String
 }
 
-@MainActor
+@Observable
 class DetailViewModel: ObservableObject {
     
     private let trackId: Int
-    @Published var appDetail: AppDetail?
-    @Published var eror: Error?
+     var appDetail: AppDetail?
+     var eror: Error?
     
     init(trackId: Int) {
         self.trackId = trackId
@@ -49,7 +49,7 @@ class DetailViewModel: ObservableObject {
 
 struct AppDetailView: View {
     
-    @StateObject var vm: DetailViewModel
+    @State var vm: DetailViewModel
     @State var isPresentingFullScreenScreenshots = false
     
     init(trackId: Int) {
@@ -62,7 +62,7 @@ struct AppDetailView: View {
     var body: some View {
         GeometryReader{ proxy in
             
-            if let error =  vm.eror {
+            if vm.eror != nil {
                 Text("Failed to fetch data detail")
                     .frame(maxWidth: .infinity,maxHeight: .infinity)
                     .font(.largeTitle)

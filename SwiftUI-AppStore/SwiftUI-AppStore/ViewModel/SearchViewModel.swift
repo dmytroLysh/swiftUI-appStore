@@ -8,16 +8,24 @@
 import SwiftUI
 import Combine
 
-@MainActor
-class SearchViewModel: ObservableObject {
+@Observable
+class SearchViewModel {
     
-    @Published var results: [AppResults] = [AppResults]()
-    @Published var query = "Snapchat"
+    var results: [AppResults] = [AppResults]()
+    var query = "Snapchat" {
+        didSet {
+            if oldValue != query {
+                queryPublisher.send(query)
+            }
+        }
+    }
+    
+    private var queryPublisher = PassthroughSubject<String,Never>()
     
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        $query
+        queryPublisher
             .debounce(for: 0.5, scheduler: DispatchQueue.main)
             .sink { [weak self] newValue in
                 
@@ -31,13 +39,7 @@ class SearchViewModel: ObservableObject {
     private func fetchJsonData(searchValue: String) {
         Task {
             do {
-                guard let url = URL(string: "https://itunes.apple.com/search?term=\(searchValue)&entity=software") else { return }
-                let (data,_) = try await URLSession.shared.data(from: url)
-                
-                let searchResult = try JSONDecoder().decode(SearchResults.self, from: data)
-                
-                self.results = searchResult.results
-                
+                self.results = try await APIService.fetchSearchResults(searchValue: searchValue)
                 
             } catch {
                 print("Failed to due error", error)

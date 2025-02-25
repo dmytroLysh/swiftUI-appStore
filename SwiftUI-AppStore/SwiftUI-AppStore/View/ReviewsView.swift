@@ -7,40 +7,10 @@
 
 import SwiftUI
 
-@MainActor
-class ReviewsViewModel: ObservableObject {
-    
-    private let trackId: Int
-    @Published var entries = [Review]()
-    
-    init(trackId: Int) {
-        
-        self.trackId = trackId
-        fetchReviews()
-    }
-    
-    private func fetchReviews() {
-        Task {
-            do {
-                guard let url = URL(string: "https://itunes.apple.com/rss/customerreviews/page=1/id=\(trackId)/sortby=mostrecent/json?l=en&cc=us") else { return }
-                
-                let(data, _) =  try await  URLSession.shared.data(from: url)
-                let reviewsResults = try JSONDecoder().decode(ReviewResults.self, from: data)
-                
-                self.entries = reviewsResults.feed.entry
-                
-            } catch {
-                print("Failed fethc app detail", error)
-            }
-        }
-    }
-    
-}
-
 struct ReviewsView: View {
     let proxy: GeometryProxy
     
-    @StateObject var vm: ReviewsViewModel
+    @State var vm: ReviewsViewModel
     let trackId: Int
     
     init(trackId: Int, proxy: GeometryProxy) {
