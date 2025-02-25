@@ -28,6 +28,7 @@ class DetailViewModel: ObservableObject {
     
     private let trackId: Int
     @Published var appDetail: AppDetail?
+    @Published var eror: Error?
     
     init(trackId: Int) {
         self.trackId = trackId
@@ -37,15 +38,9 @@ class DetailViewModel: ObservableObject {
     private func fetchJsonData(){
         Task {
             do {
-                guard let url = URL(string: "https://itunes.apple.com/lookup?id=\(trackId)") else { return }
-                
-                let(data, _) =  try await  URLSession.shared.data(from: url)
-                let appDetailResults = try JSONDecoder().decode(AppDetailResults.self, from: data)
-                
-                self.appDetail = appDetailResults.results.first
-                
+                self.appDetail = try await APIService.fetchAppDetail(trackID: trackId)
             } catch {
-                print("Failed fethc app detail", error)
+                self.eror = error
             }
         }
     }
@@ -66,6 +61,15 @@ struct AppDetailView: View {
     
     var body: some View {
         GeometryReader{ proxy in
+            
+            if let error =  vm.eror {
+                Text("Failed to fetch data detail")
+                    .frame(maxWidth: .infinity,maxHeight: .infinity)
+                    .font(.largeTitle)
+                    .padding()
+                    .multilineTextAlignment(.center)
+            }
+            
             ScrollView {
                 if let appDetail = vm.appDetail {
                     HStack(spacing: 16) {
